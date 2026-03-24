@@ -419,6 +419,18 @@ static inline NSColor *sbRGBA(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
     return nil;
 }
 
+- (void)applyReachyWindowChrome:(NSWindow *)window {
+    window.titlebarAppearsTransparent = YES;
+    window.titleVisibility = NSWindowTitleHidden;
+    window.movableByWindowBackground = YES;
+    window.appearance = [NSAppearance appearanceNamed:NSAppearanceNameDarkAqua];
+    window.backgroundColor = [NSColor colorWithRed:5/255.0 green:10/255.0 blue:18/255.0 alpha:1];
+    if (@available(macOS 11.0, *)) {
+        window.toolbarStyle = NSWindowToolbarStyleUnifiedCompact;
+        window.titlebarSeparatorStyle = NSTitlebarSeparatorStyleNone;
+    }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Menu Bar
 // ─────────────────────────────────────────────────────────────────────────────
@@ -470,13 +482,8 @@ static inline NSColor *sbRGBA(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
                                                       defer:NO];
     self.mainWindow.title = @"Reachy Control";
     self.mainWindow.subtitle = @"Mini Lite Desktop";
-    self.mainWindow.titlebarAppearsTransparent = YES;
     self.mainWindow.minSize = NSMakeSize(1120, 680);
-    self.mainWindow.appearance = [NSAppearance appearanceNamed:NSAppearanceNameDarkAqua];
-    self.mainWindow.backgroundColor = [NSColor colorWithRed:5/255.0 green:10/255.0 blue:18/255.0 alpha:1];
-    if (@available(macOS 11.0, *)) {
-        self.mainWindow.toolbarStyle = NSWindowToolbarStyleUnifiedCompact;
-    }
+    [self applyReachyWindowChrome:self.mainWindow];
 
     NSView *contentView = self.mainWindow.contentView;
     contentView.wantsLayer = YES;
@@ -544,13 +551,8 @@ static inline NSColor *sbRGBA(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
                                                             defer:NO];
     self.rubikCoachWindow.title = @"Conversation App";
     self.rubikCoachWindow.subtitle = @"OpenAI Live + Personality Control";
-    self.rubikCoachWindow.titlebarAppearsTransparent = YES;
     self.rubikCoachWindow.minSize = NSMakeSize(980, 640);
-    self.rubikCoachWindow.appearance = [NSAppearance appearanceNamed:NSAppearanceNameDarkAqua];
-    self.rubikCoachWindow.backgroundColor = [NSColor colorWithRed:5/255.0 green:10/255.0 blue:18/255.0 alpha:1];
-    if (@available(macOS 11.0, *)) {
-        self.rubikCoachWindow.toolbarStyle = NSWindowToolbarStyleUnifiedCompact;
-    }
+    [self applyReachyWindowChrome:self.rubikCoachWindow];
 
     self.rubikCoachWindow.contentView.wantsLayer = YES;
     self.rubikCoachPanel = [[RubikCoachPanel alloc] init];
