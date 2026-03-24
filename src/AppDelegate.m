@@ -293,7 +293,7 @@ static inline NSColor *sbRGBA(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
         NSLog(@"WARNING: Python bridge failed to initialize — daemon features disabled");
     }
 
-    // Start daemon — autostart=True connects robot in background, wake_up_on_start=False
+    // Start the local HTTP daemon. The dashboard/connection UI explicitly starts the robot backend.
     NSString *daemonResult = [self.pythonBridge callFunction:@"start_daemon" withArgs:nil];
     NSLog(@"start_daemon on launch: %@", daemonResult);
 
@@ -488,7 +488,7 @@ static inline NSColor *sbRGBA(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
     NSView *contentView = self.mainWindow.contentView;
     contentView.wantsLayer = YES;
 
-    // Build sidebar items (Dashboard first, then Conversation for Live API)
+    // Build sidebar items (Dashboard first, then Connection and tool panels)
     [self buildSidebarItems];
 
     // Sidebar (220pt wide, full height)
@@ -524,7 +524,7 @@ static inline NSColor *sbRGBA(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
         [ws showPanelAtIndex:idx];
     };
 
-    // Start on Connection panel (index 0) — robot status + Wake Up is the entry point
+    // Start on the official dashboard flow.
     [self.sidebarController.tableView
         selectRowIndexes:[NSIndexSet indexSetWithIndex:0]
         byExtendingSelection:NO];
@@ -582,6 +582,7 @@ static inline NSColor *sbRGBA(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
 
 - (void)buildSidebarItems {
     NSArray *defs = @[
+        @[@"Dashboard",    @"square.grid.2x2",         [DashboardPanel class]],
         @[@"Connection",   @"cable.connector",         [ConnectionPanel class]],
         @[@"Conversation", @"waveform.and.mic",        [ChatPanel class]],
         @[@"Camera",       @"camera",                  [CameraPanel class]],

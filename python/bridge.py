@@ -228,7 +228,7 @@ def start_daemon() -> str:
             localhost_only=True,
             fastapi_host="127.0.0.1",
             fastapi_port=8000,
-            autostart=True,            # auto-connect robot on daemon start
+            autostart=False,           # match desktop app flow: UI starts robot explicitly
             wake_up_on_start=False,    # user presses Wake Up manually
             use_audio=False,           # GStreamer unavailable; audio via live_chat.py
         )
