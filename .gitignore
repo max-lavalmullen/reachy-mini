@@ -4,3 +4,16 @@ ReachyControl.app/
 *.pyc
 .DS_Store
 *.egg-info/
+# Community source apps are third-party repos — ignore their nested git dirs
+apps/community_sources/Theremini/
+apps/community_sources/chess_emotions_app/
+apps/community_sources/dj-reachy/
+apps/community_sources/dj_reactor/
+apps/community_sources/emotions/
+apps/community_sources/hand_tracker_v2/
+apps/community_sources/reachy_mini_astronomer/
+apps/community_sources/reachy_mini_clock/
+apps/community_sources/reachy_mini_metronome/
+apps/community_sources/reachy_mini_radio/
+# Web interface (separate repo — tracked independently)
+web/
