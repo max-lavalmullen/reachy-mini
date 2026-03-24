@@ -28,9 +28,7 @@ SRCS = src/main.m \
        src/AppDelegate.m \
        src/PythonBridge.m \
        src/HTTPClient.m \
-       src/panels/ConnectionPanel.m \
        src/panels/CameraPanel.m \
-       src/panels/HeadControlPanel.m \
        src/panels/AntennaPanel.m \
        src/panels/MotorPanel.m \
        src/panels/BehaviorsPanel.m \
@@ -57,7 +55,6 @@ $(BUNDLE): $(OBJS) resources/ReachyControl.icns
 	$(CC) $(OBJS) $(LDFLAGS) -o $(BINARY)
 	@cp python/bridge.py $(BUNDLE)/Contents/Resources/bridge.py
 	@cp python/live_chat.py $(BUNDLE)/Contents/Resources/live_chat.py
-	@cp python/connection-gate.html $(BUNDLE)/Contents/Resources/connection-gate.html
 	@cp resources/reachy-mini-sleeping.svg $(BUNDLE)/Contents/Resources/reachy-mini-sleeping.svg
 	@cp resources/reachy-mini-awake.svg $(BUNDLE)/Contents/Resources/reachy-mini-awake.svg
 	@cp resources/reachy-mini-ko.svg $(BUNDLE)/Contents/Resources/reachy-mini-ko.svg

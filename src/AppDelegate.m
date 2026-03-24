@@ -1,9 +1,7 @@
 #import "AppDelegate.h"
 #import "PythonBridge.h"
 #import "HTTPClient.h"
-#import "panels/ConnectionPanel.h"
 #import "panels/CameraPanel.h"
-#import "panels/HeadControlPanel.h"
 #import "panels/AntennaPanel.h"
 #import "panels/MotorPanel.h"
 #import "panels/BehaviorsPanel.h"
@@ -583,7 +581,6 @@ static inline NSColor *sbRGBA(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
 - (void)buildSidebarItems {
     NSArray *defs = @[
         @[@"Dashboard",    @"square.grid.2x2",         [DashboardPanel class]],
-        @[@"Connection",   @"cable.connector",         [ConnectionPanel class]],
         @[@"Conversation", @"waveform.and.mic",        [ChatPanel class]],
         @[@"Camera",       @"camera",                  [CameraPanel class]],
         @[@"Controls",     @"dot.arrowtriangles.up.right.down.left.circle", [AntennaPanel class]],

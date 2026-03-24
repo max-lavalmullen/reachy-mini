@@ -2,6 +2,7 @@ python/.venv/
 ReachyControl.app/
 **/__pycache__/
 *.pyc
+*.o
 .DS_Store
 *.egg-info/
 # Community source apps are third-party repos — ignore their nested git dirs
