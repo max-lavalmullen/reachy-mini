@@ -5,6 +5,11 @@ ReachyControl.app/
 *.o
 .DS_Store
 *.egg-info/
+# Secrets — never commit real keys
+.env
+.env.local
+.env.production
+.env.*.local
 # Community source apps are third-party repos — ignore their nested git dirs
 apps/community_sources/Theremini/
 apps/community_sources/chess_emotions_app/
