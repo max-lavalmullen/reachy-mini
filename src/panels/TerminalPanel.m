@@ -18,7 +18,12 @@
 // ── Palette ──────────────────────────────────────────────────────────────────
 
 #define RGB(r,g,b) [NSColor colorWithRed:(r)/255.0 green:(g)/255.0 blue:(b)/255.0 alpha:1]
+#define RGBA(r,g,b,a) [NSColor colorWithRed:(r)/255.0 green:(g)/255.0 blue:(b)/255.0 alpha:(a)]
 static NSColor *kTermBg;
+static NSColor *kCardBg;
+static NSColor *kBorderColor;
+static NSColor *kBodyText;
+static NSColor *kDimText;
 static NSColor *kTermFg;
 static NSColor *kTermGreen;
 static NSColor *kTermAmber;
@@ -30,14 +35,18 @@ static NSColor *kInputBg;
 static void initColors(void) {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        kTermBg     = RGB(12,  13,  18);
-        kTermFg     = RGB(205, 214, 244);
-        kTermGreen  = RGB(166, 227, 161);
-        kTermAmber  = RGB(249, 226, 175);
-        kTermBlue   = RGB(137, 220, 235);
-        kTermRed    = RGB(243, 139, 168);
-        kToolbarBg  = RGB(24,  25,  38);
-        kInputBg    = RGB(30,  32,  48);
+        kTermBg      = RGB(5, 10, 18);
+        kCardBg      = RGB(14, 25, 42);
+        kBorderColor = RGBA(255, 255, 255, 0.08);
+        kBodyText    = [NSColor colorWithWhite:0.85 alpha:1.0];
+        kDimText     = RGBA(202, 211, 223, 0.55);
+        kTermGreen   = RGB(61, 222, 153);
+        kTermFg      = kTermGreen;
+        kTermAmber   = RGB(255, 193, 92);
+        kTermBlue    = kTermGreen;
+        kTermRed     = RGB(255, 120, 120);
+        kToolbarBg   = kCardBg;
+        kInputBg     = kCardBg;
     });
 }
 
@@ -163,6 +172,9 @@ static NSString * const kMoveRE = @"<!--\\s*(?:MOVE|BEHAVIOR):\\s*(\\S+)\\s*-->"
     NSView *toolbar = [[NSView alloc] init];
     toolbar.wantsLayer = YES;
     toolbar.layer.backgroundColor = kToolbarBg.CGColor;
+    toolbar.layer.cornerRadius = 14;
+    toolbar.layer.borderWidth = 1;
+    toolbar.layer.borderColor = kBorderColor.CGColor;
     toolbar.translatesAutoresizingMaskIntoConstraints = NO;
     [v addSubview:toolbar];
 
@@ -173,12 +185,12 @@ static NSString * const kMoveRE = @"<!--\\s*(?:MOVE|BEHAVIOR):\\s*(\\S+)\\s*-->"
     self.statusDot = [[NSView alloc] init];
     self.statusDot.wantsLayer = YES;
     self.statusDot.layer.cornerRadius = 4;
-    self.statusDot.layer.backgroundColor = [NSColor colorWithWhite:0.3 alpha:1].CGColor;
+    self.statusDot.layer.backgroundColor = kDimText.CGColor;
 
     self.statusLabel = [NSTextField labelWithString:
         [NSString stringWithFormat:@"Workspace: %@  ·  choose a CLI to start",
             [AppDelegate shared].workspacePath.lastPathComponent ?: @"Home"]];
-    self.statusLabel.textColor = [NSColor colorWithWhite:0.45 alpha:1];
+    self.statusLabel.textColor = kDimText;
     self.statusLabel.font = [NSFont monospacedSystemFontOfSize:11 weight:NSFontWeightRegular];
 
     self.stopBtn  = [self makeSmallButton:@"■  Stop"  action:@selector(stopCLI:)];
@@ -193,7 +205,7 @@ static NSString * const kMoveRE = @"<!--\\s*(?:MOVE|BEHAVIOR):\\s*(\\S+)\\s*-->"
     self.ttsCheck = [NSButton checkboxWithTitle:@"Reachy speaks" target:nil action:nil];
     self.ttsCheck.state = NSControlStateValueOn;
     self.ttsCheck.font = [NSFont systemFontOfSize:11];
-    self.ttsCheck.contentTintColor = kTermBlue;
+    self.ttsCheck.contentTintColor = kTermGreen;
 
     // ── Terminal ──────────────────────────────────────────────────────────────
     self.textView = [[TermTextView alloc] init];
@@ -213,19 +225,18 @@ static NSString * const kMoveRE = @"<!--\\s*(?:MOVE|BEHAVIOR):\\s*(\\S+)\\s*-->"
     self.scroll.backgroundColor       = kTermBg;
     self.scroll.documentView          = self.textView;
     self.scroll.wantsLayer            = YES;
-    self.scroll.layer.cornerRadius    = 0;
-
-    // Thin separator line between toolbar and terminal
-    NSView *sep = [[NSView alloc] init];
-    sep.wantsLayer = YES;
-    sep.layer.backgroundColor = [NSColor colorWithWhite:0.2 alpha:1].CGColor;
-    sep.translatesAutoresizingMaskIntoConstraints = NO;
-    [v addSubview:sep];
+    self.scroll.layer.cornerRadius    = 14;
+    self.scroll.layer.borderWidth     = 1;
+    self.scroll.layer.borderColor     = kBorderColor.CGColor;
+    self.scroll.layer.backgroundColor = kTermBg.CGColor;
 
     // ── Input bar ─────────────────────────────────────────────────────────────
     NSView *inputBar = [[NSView alloc] init];
     inputBar.wantsLayer = YES;
     inputBar.layer.backgroundColor = kInputBg.CGColor;
+    inputBar.layer.cornerRadius = 14;
+    inputBar.layer.borderWidth = 1;
+    inputBar.layer.borderColor = kBorderColor.CGColor;
     inputBar.translatesAutoresizingMaskIntoConstraints = NO;
     [v addSubview:inputBar];
 
@@ -236,12 +247,18 @@ static NSString * const kMoveRE = @"<!--\\s*(?:MOVE|BEHAVIOR):\\s*(\\S+)\\s*-->"
     self.voiceBtn.bezelStyle = NSBezelStyleCircular;
     self.voiceBtn.enabled = NO;
     self.voiceBtn.font = [NSFont systemFontOfSize:16];
+    self.voiceBtn.wantsLayer = YES;
+    self.voiceBtn.layer.cornerRadius = 17;
+    self.voiceBtn.layer.backgroundColor = RGBA(255,255,255,0.05).CGColor;
+    self.voiceBtn.layer.borderWidth = 1;
+    self.voiceBtn.layer.borderColor = RGBA(255,255,255,0.12).CGColor;
+    self.voiceBtn.contentTintColor = kTermGreen;
 
     self.inputField = [[NSTextField alloc] init];
     self.inputField.placeholderString = @"Speak or type  ⏎ to send…";
     self.inputField.font = [NSFont monospacedSystemFontOfSize:12.5 weight:NSFontWeightRegular];
-    self.inputField.textColor = kTermFg;
-    self.inputField.backgroundColor = [NSColor colorWithWhite:0.08 alpha:1];
+    self.inputField.textColor = kBodyText;
+    self.inputField.backgroundColor = kTermBg;
     self.inputField.bezeled = NO;
     self.inputField.drawsBackground = YES;
     self.inputField.focusRingType = NSFocusRingTypeNone;
@@ -250,7 +267,7 @@ static NSString * const kMoveRE = @"<!--\\s*(?:MOVE|BEHAVIOR):\\s*(\\S+)\\s*-->"
     self.inputField.enabled = NO;
     self.inputField.wantsLayer = YES;
     self.inputField.layer.cornerRadius = 6;
-    self.inputField.layer.borderColor = [NSColor colorWithWhite:0.25 alpha:1].CGColor;
+    self.inputField.layer.borderColor = RGBA(255,255,255,0.12).CGColor;
     self.inputField.layer.borderWidth = 1;
 
     self.sendBtn = [[NSButton alloc] init];
@@ -261,10 +278,15 @@ static NSString * const kMoveRE = @"<!--\\s*(?:MOVE|BEHAVIOR):\\s*(\\S+)\\s*-->"
     self.sendBtn.font = [NSFont boldSystemFontOfSize:15];
     self.sendBtn.enabled = NO;
     self.sendBtn.wantsLayer = YES;
+    self.sendBtn.layer.cornerRadius = 10;
+    self.sendBtn.layer.backgroundColor = RGBA(61,222,153,0.15).CGColor;
+    self.sendBtn.layer.borderWidth = 1;
+    self.sendBtn.layer.borderColor = RGBA(61,222,153,0.55).CGColor;
+    self.sendBtn.contentTintColor = kTermGreen;
 
     self.transcriptLabel = [NSTextField labelWithString:@""];
-    self.transcriptLabel.textColor = [NSColor colorWithRed:0.5 green:0.85 blue:1.0 alpha:1];
-    self.transcriptLabel.font = [NSFont systemFontOfSize:11];
+    self.transcriptLabel.textColor = kTermGreen;
+    self.transcriptLabel.font = [NSFont monospacedSystemFontOfSize:11 weight:NSFontWeightRegular];
 
     // ── Add all to subview hierarchy ─────────────────────────────────────────
     for (NSView *sub in @[self.claudeBtn, self.geminiBtn, self.codexBtn,
@@ -286,27 +308,21 @@ static NSString * const kMoveRE = @"<!--\\s*(?:MOVE|BEHAVIOR):\\s*(\\S+)\\s*-->"
 
     [NSLayoutConstraint activateConstraints:@[
         // Toolbar — pinned to top
-        [toolbar.topAnchor    constraintEqualToAnchor:v.topAnchor],
-        [toolbar.leadingAnchor constraintEqualToAnchor:v.leadingAnchor],
-        [toolbar.trailingAnchor constraintEqualToAnchor:v.trailingAnchor],
+        [toolbar.topAnchor    constraintEqualToAnchor:v.topAnchor constant:14],
+        [toolbar.leadingAnchor constraintEqualToAnchor:v.leadingAnchor constant:18],
+        [toolbar.trailingAnchor constraintEqualToAnchor:v.trailingAnchor constant:-18],
         [toolbar.heightAnchor  constraintEqualToConstant:tbH],
 
-        // Separator
-        [sep.topAnchor    constraintEqualToAnchor:toolbar.bottomAnchor],
-        [sep.leadingAnchor constraintEqualToAnchor:v.leadingAnchor],
-        [sep.trailingAnchor constraintEqualToAnchor:v.trailingAnchor],
-        [sep.heightAnchor  constraintEqualToConstant:1],
-
         // Terminal scroll — fills the middle
-        [self.scroll.topAnchor    constraintEqualToAnchor:sep.bottomAnchor],
-        [self.scroll.leadingAnchor constraintEqualToAnchor:v.leadingAnchor],
-        [self.scroll.trailingAnchor constraintEqualToAnchor:v.trailingAnchor],
-        [self.scroll.bottomAnchor  constraintEqualToAnchor:inputBar.topAnchor],
+        [self.scroll.topAnchor    constraintEqualToAnchor:toolbar.bottomAnchor constant:12],
+        [self.scroll.leadingAnchor constraintEqualToAnchor:v.leadingAnchor constant:18],
+        [self.scroll.trailingAnchor constraintEqualToAnchor:v.trailingAnchor constant:-18],
+        [self.scroll.bottomAnchor  constraintEqualToAnchor:inputBar.topAnchor constant:-12],
 
         // Input bar — pinned to bottom
-        [inputBar.leadingAnchor  constraintEqualToAnchor:v.leadingAnchor],
-        [inputBar.trailingAnchor constraintEqualToAnchor:v.trailingAnchor],
-        [inputBar.bottomAnchor   constraintEqualToAnchor:v.bottomAnchor],
+        [inputBar.leadingAnchor  constraintEqualToAnchor:v.leadingAnchor constant:18],
+        [inputBar.trailingAnchor constraintEqualToAnchor:v.trailingAnchor constant:-18],
+        [inputBar.bottomAnchor   constraintEqualToAnchor:v.bottomAnchor constant:-14],
         [inputBar.heightAnchor   constraintEqualToConstant:ibH],
 
         // ── Toolbar contents ──────────────────────────────────────────────
@@ -372,9 +388,9 @@ static NSString * const kMoveRE = @"<!--\\s*(?:MOVE|BEHAVIOR):\\s*(\\S+)\\s*-->"
     ]];
 
     // Welcome banner
-    [self appendLine:@"┌────────────────────────────────────────────┐" color:kTermBlue];
-    [self appendLine:@"│ Reachy Agent Tools — Claude, Gemini, Codex │" color:kTermBlue];
-    [self appendLine:@"└────────────────────────────────────────────┘\n" color:kTermBlue];
+    [self appendLine:@"┌────────────────────────────────────────────┐" color:kTermGreen];
+    [self appendLine:@"│ Reachy Agent Tools — Claude, Gemini, Codex │" color:kTermGreen];
+    [self appendLine:@"└────────────────────────────────────────────┘\n" color:kTermGreen];
 }
 
 // ── Button factory ─────────────────────────────────────────────────────────
@@ -386,12 +402,12 @@ static NSString * const kMoveRE = @"<!--\\s*(?:MOVE|BEHAVIOR):\\s*(\\S+)\\s*-->"
     btn.action = action;
     btn.bezelStyle = NSBezelStyleRounded;
     btn.wantsLayer = YES;
-    btn.layer.cornerRadius = 7;
-    btn.layer.borderColor  = [NSColor colorWithWhite:0.3 alpha:1].CGColor;
+    btn.layer.cornerRadius = 10;
+    btn.layer.borderColor  = RGBA(255,255,255,0.12).CGColor;
     btn.layer.borderWidth  = 1;
-    btn.layer.backgroundColor = [NSColor colorWithWhite:0.12 alpha:1].CGColor;
+    btn.layer.backgroundColor = RGBA(255,255,255,0.05).CGColor;
     btn.font = [NSFont boldSystemFontOfSize:13];
-    btn.contentTintColor = [NSColor colorWithWhite:0.85 alpha:1];
+    btn.contentTintColor = kBodyText;
     return btn;
 }
 
@@ -399,18 +415,24 @@ static NSString * const kMoveRE = @"<!--\\s*(?:MOVE|BEHAVIOR):\\s*(\\S+)\\s*-->"
     NSButton *btn = [NSButton buttonWithTitle:title target:self action:action];
     btn.bezelStyle = NSBezelStyleRounded;
     btn.font = [NSFont systemFontOfSize:11];
+    btn.wantsLayer = YES;
+    btn.layer.cornerRadius = 8;
+    btn.layer.backgroundColor = RGBA(255,255,255,0.05).CGColor;
+    btn.layer.borderWidth = 1;
+    btn.layer.borderColor = RGBA(255,255,255,0.12).CGColor;
+    btn.contentTintColor = kBodyText;
     return btn;
 }
 
 - (void)setLaunchButton:(NSButton *)btn active:(BOOL)active {
     if (active) {
-        btn.layer.backgroundColor = [NSColor colorWithRed:0.15 green:0.55 blue:0.35 alpha:0.35].CGColor;
-        btn.layer.borderColor = [NSColor colorWithRed:0.3 green:0.9 blue:0.5 alpha:0.8].CGColor;
+        btn.layer.backgroundColor = RGBA(61,222,153,0.14).CGColor;
+        btn.layer.borderColor = RGBA(61,222,153,0.55).CGColor;
         btn.contentTintColor = kTermGreen;
     } else {
-        btn.layer.backgroundColor = [NSColor colorWithWhite:0.12 alpha:1].CGColor;
-        btn.layer.borderColor = [NSColor colorWithWhite:0.3 alpha:1].CGColor;
-        btn.contentTintColor = [NSColor colorWithWhite:0.85 alpha:1];
+        btn.layer.backgroundColor = RGBA(255,255,255,0.05).CGColor;
+        btn.layer.borderColor = RGBA(255,255,255,0.12).CGColor;
+        btn.contentTintColor = kBodyText;
     }
 }
 
@@ -576,11 +598,11 @@ static NSString * const kMoveRE = @"<!--\\s*(?:MOVE|BEHAVIOR):\\s*(\\S+)\\s*-->"
     self.stopBtn.enabled    = NO;
     self.inputField.enabled = NO;
     self.sendBtn.enabled    = NO;
-    self.statusDot.layer.backgroundColor = [NSColor colorWithWhite:0.3 alpha:1].CGColor;
+    self.statusDot.layer.backgroundColor = kDimText.CGColor;
     self.statusLabel.stringValue = [NSString stringWithFormat:
         @"Workspace: %@  ·  choose a CLI to restart",
         [AppDelegate shared].workspacePath.lastPathComponent ?: @"Home"];
-    self.statusLabel.textColor = [NSColor colorWithWhite:0.45 alpha:1];
+    self.statusLabel.textColor = kDimText;
     for (NSButton *button in [self launchButtons]) [self setLaunchButton:button active:NO];
     [self.ttsDebounce invalidate];
     self.ttsDebounce = nil;
@@ -609,7 +631,7 @@ static NSString * const kMoveRE = @"<!--\\s*(?:MOVE|BEHAVIOR):\\s*(\\S+)\\s*-->"
     if (!self.running || !self.stdinFH) return;
     NSString *line = [text stringByAppendingString:@"\n"];
     [self.stdinFH writeData:[line dataUsingEncoding:NSUTF8StringEncoding]];
-    [self appendLine:[NSString stringWithFormat:@"  ➤  %@", text] color:kTermGreen];
+    [self appendLine:[NSString stringWithFormat:@"  ➤  %@", text] color:kBodyText];
 }
 
 - (void)didReadOut:(NSNotification *)n {
@@ -737,7 +759,9 @@ static NSString * const kMoveRE = @"<!--\\s*(?:MOVE|BEHAVIOR):\\s*(\\S+)\\s*-->"
     [self.audioEngine startAndReturnError:&err];
 
     self.listening = YES;
-    self.voiceBtn.contentTintColor = kTermRed;
+    self.voiceBtn.layer.backgroundColor = RGBA(61,222,153,0.16).CGColor;
+    self.voiceBtn.layer.borderColor = RGBA(61,222,153,0.55).CGColor;
+    self.voiceBtn.contentTintColor = kTermGreen;
     self.transcriptLabel.stringValue = @"🎙  Listening…";
 }
 
@@ -747,7 +771,9 @@ static NSString * const kMoveRE = @"<!--\\s*(?:MOVE|BEHAVIOR):\\s*(\\S+)\\s*-->"
     [self.audioEngine.inputNode removeTapOnBus:0];
     [self.audioEngine stop];
     [self.sttRequest endAudio];
-    self.voiceBtn.contentTintColor = nil;
+    self.voiceBtn.layer.backgroundColor = RGBA(255,255,255,0.05).CGColor;
+    self.voiceBtn.layer.borderColor = RGBA(255,255,255,0.12).CGColor;
+    self.voiceBtn.contentTintColor = kTermGreen;
     self.transcriptLabel.stringValue = @"";
 }
 
