@@ -333,6 +333,24 @@ static NSArray<NSString *> *kDatasets;
     self.behaviorZone = behaviorZone;
     [v addSubview:behaviorZone];
 
+    NSView *robotCard = [[NSView alloc] init];
+    robotCard.translatesAutoresizingMaskIntoConstraints = NO;
+    robotCard.wantsLayer = YES;
+    robotCard.layer.cornerRadius = 18;
+    robotCard.layer.borderWidth = 1;
+    robotCard.layer.borderColor = pRGBA(255,255,255,0.08).CGColor;
+    robotCard.layer.backgroundColor = pRGB(14,25,42).CGColor;
+    [robotZone addSubview:robotCard];
+
+    NSView *behaviorCard = [[NSView alloc] init];
+    behaviorCard.translatesAutoresizingMaskIntoConstraints = NO;
+    behaviorCard.wantsLayer = YES;
+    behaviorCard.layer.cornerRadius = 18;
+    behaviorCard.layer.borderWidth = 1;
+    behaviorCard.layer.borderColor = pRGBA(255,255,255,0.08).CGColor;
+    behaviorCard.layer.backgroundColor = pRGB(14,25,42).CGColor;
+    [behaviorZone addSubview:behaviorCard];
+
     [NSLayoutConstraint activateConstraints:@[
         [robotZone.topAnchor constraintEqualToAnchor:v.topAnchor],
         [robotZone.leadingAnchor constraintEqualToAnchor:v.leadingAnchor],
@@ -342,6 +360,16 @@ static NSArray<NSString *> *kDatasets;
         [behaviorZone.leadingAnchor constraintEqualToAnchor:v.leadingAnchor],
         [behaviorZone.trailingAnchor constraintEqualToAnchor:v.trailingAnchor],
         [behaviorZone.bottomAnchor constraintEqualToAnchor:v.bottomAnchor],
+
+        [robotCard.topAnchor constraintEqualToAnchor:robotZone.topAnchor constant:18],
+        [robotCard.leadingAnchor constraintEqualToAnchor:robotZone.leadingAnchor constant:20],
+        [robotCard.trailingAnchor constraintEqualToAnchor:robotZone.trailingAnchor constant:-20],
+        [robotCard.bottomAnchor constraintEqualToAnchor:robotZone.bottomAnchor constant:-10],
+
+        [behaviorCard.topAnchor constraintEqualToAnchor:behaviorZone.topAnchor constant:10],
+        [behaviorCard.leadingAnchor constraintEqualToAnchor:behaviorZone.leadingAnchor constant:20],
+        [behaviorCard.trailingAnchor constraintEqualToAnchor:behaviorZone.trailingAnchor constant:-20],
+        [behaviorCard.bottomAnchor constraintEqualToAnchor:behaviorZone.bottomAnchor constant:-18],
     ]];
 
     // ── Robot SVG ─────────────────────────────────────────────────────────────
@@ -352,8 +380,10 @@ static NSArray<NSString *> *kDatasets;
     wv.navigationDelegate = self;
     wv.wantsLayer = YES;
     wv.layer.cornerRadius = 20; wv.layer.masksToBounds = YES;
-    wv.layer.backgroundColor = pRGB(26,46,90).CGColor;
-    if (@available(macOS 12.0, *)) wv.underPageBackgroundColor = [NSColor clearColor];
+    wv.layer.borderWidth = 1;
+    wv.layer.borderColor = pRGBA(255,255,255,0.08).CGColor;
+    wv.layer.backgroundColor = pRGB(5,10,18).CGColor;
+    if (@available(macOS 12.0, *)) wv.underPageBackgroundColor = pRGB(5,10,18);
     self.robotView = wv;
 
     // ── Robot name ────────────────────────────────────────────────────────────
@@ -369,7 +399,7 @@ static NSArray<NSString *> *kDatasets;
 
     CPBadge *badge = [[CPBadge alloc] initWithFrame:NSMakeRect(0,0,100,22)];
     badge.translatesAutoresizingMaskIntoConstraints = NO;
-    [badge setTitle:@"Starting…" fill:pRGB(245,158,11) text:[NSColor whiteColor]];
+    [badge setTitle:@"● Connecting" fill:pRGBA(255,255,255,0.08) text:pRGBA(202,211,223,0.78)];
     self.stateBadge = badge;
 
     // ── Name row (name + badge, horizontal) ───────────────────────────────────
@@ -386,7 +416,7 @@ static NSArray<NSString *> *kDatasets;
     NSTextField *detail = [NSTextField labelWithString:@"Connecting to Reachy…"];
     detail.translatesAutoresizingMaskIntoConstraints = NO;
     detail.font = [NSFont systemFontOfSize:12];
-    detail.textColor = pRGBA(202,211,223,0.60);
+    detail.textColor = pRGBA(202,211,223,0.55);
     detail.alignment = NSTextAlignmentCenter;
     detail.lineBreakMode = NSLineBreakByWordWrapping;
     detail.maximumNumberOfLines = 2;
@@ -415,7 +445,7 @@ static NSArray<NSString *> *kDatasets;
     sleep.translatesAutoresizingMaskIntoConstraints = NO;
     [sleep styleTitle:@"Goto Sleep" color:pRGBA(255,255,255,0.80) size:14];
     sleep.fillColor = pRGBA(255,255,255,0);
-    sleep.borderColor = pRGBA(255,255,255,0.20);
+    sleep.borderColor = pRGBA(255,255,255,0.12);
     sleep.target = self; sleep.action = @selector(sleepBtnClicked:);
     sleep.hidden = YES;
     self.sleepBtn = sleep;
@@ -446,7 +476,7 @@ static NSArray<NSString *> *kDatasets;
     [contentStack setCustomSpacing:16 afterView:detail];
     [contentStack addArrangedSubview:actionRow];
 
-    [robotZone addSubview:contentStack];
+    [robotCard addSubview:contentStack];
 
     // Fixed sizes
     [NSLayoutConstraint activateConstraints:@[
@@ -460,11 +490,11 @@ static NSArray<NSString *> *kDatasets;
         [spin.heightAnchor constraintEqualToConstant:18],
         [detail.widthAnchor constraintLessThanOrEqualToConstant:420],
         // Content stack: center in robot zone
-        [contentStack.centerXAnchor constraintEqualToAnchor:robotZone.centerXAnchor],
-        [contentStack.centerYAnchor constraintEqualToAnchor:robotZone.centerYAnchor],
+        [contentStack.centerXAnchor constraintEqualToAnchor:robotCard.centerXAnchor],
+        [contentStack.centerYAnchor constraintEqualToAnchor:robotCard.centerYAnchor],
         // Keep content within bounds
-        [contentStack.leadingAnchor constraintGreaterThanOrEqualToAnchor:robotZone.leadingAnchor constant:20],
-        [contentStack.trailingAnchor constraintLessThanOrEqualToAnchor:robotZone.trailingAnchor constant:-20],
+        [contentStack.leadingAnchor constraintGreaterThanOrEqualToAnchor:robotCard.leadingAnchor constant:20],
+        [contentStack.trailingAnchor constraintLessThanOrEqualToAnchor:robotCard.trailingAnchor constant:-20],
     ]];
 
     [self loadRobotSVG:@"sleeping"];
@@ -474,13 +504,13 @@ static NSArray<NSString *> *kDatasets;
     // Divider
     NSView *div = [[NSView alloc] init];
     div.translatesAutoresizingMaskIntoConstraints = NO;
-    div.wantsLayer = YES; div.layer.backgroundColor = pRGBA(255,255,255,0.09).CGColor;
-    [behaviorZone addSubview:div];
+    div.wantsLayer = YES; div.layer.backgroundColor = pRGBA(255,255,255,0.07).CGColor;
+    [behaviorCard addSubview:div];
 
     // Dataset tabs
     NSView *tabBar = [[NSView alloc] init];
     tabBar.translatesAutoresizingMaskIntoConstraints = NO;
-    [behaviorZone addSubview:tabBar];
+    [behaviorCard addSubview:tabBar];
 
     NSArray<NSString *> *tabTitles = @[@"Emotions", @"Animations", @"Dances"];
     NSMutableArray<CPButton *> *tabs = [NSMutableArray array];
@@ -504,19 +534,19 @@ static NSArray<NSString *> *kDatasets;
     NSTextField *bStatus = [NSTextField labelWithString:@""];
     bStatus.translatesAutoresizingMaskIntoConstraints = NO;
     bStatus.font = [NSFont systemFontOfSize:11 weight:NSFontWeightMedium];
-    bStatus.textColor = pRGBA(255,255,255,0.30);
+    bStatus.textColor = pRGBA(202,211,223,0.55);
     bStatus.alignment = NSTextAlignmentRight;
     self.behaviorStatusLabel = bStatus;
-    [behaviorZone addSubview:bStatus];
+    [behaviorCard addSubview:bStatus];
 
     // Serial port label
     NSTextField *portLbl = [NSTextField labelWithString:@""];
     portLbl.translatesAutoresizingMaskIntoConstraints = NO;
     portLbl.font = [NSFont monospacedSystemFontOfSize:10 weight:NSFontWeightRegular];
-    portLbl.textColor = pRGBA(255,255,255,0.18);
+    portLbl.textColor = pRGBA(202,211,223,0.40);
     portLbl.alignment = NSTextAlignmentRight;
     self.serialPortLabel = portLbl;
-    [behaviorZone addSubview:portLbl];
+    [behaviorCard addSubview:portLbl];
 
     // Behavior grid + scroll view
     BehaviorGridView *grid = [[BehaviorGridView alloc] initWithFrame:NSMakeRect(0,0,960,300)];
@@ -532,18 +562,18 @@ static NSArray<NSString *> *kDatasets;
     scroll.drawsBackground = NO;
     scroll.documentView = grid;
     self.behaviorScroll = scroll;
-    [behaviorZone addSubview:scroll];
+    [behaviorCard addSubview:scroll];
 
     // Behavior zone constraints
     [NSLayoutConstraint activateConstraints:@[
         // Divider at very top of behavior zone
-        [div.topAnchor constraintEqualToAnchor:behaviorZone.topAnchor],
-        [div.leadingAnchor constraintEqualToAnchor:behaviorZone.leadingAnchor],
-        [div.trailingAnchor constraintEqualToAnchor:behaviorZone.trailingAnchor],
+        [div.topAnchor constraintEqualToAnchor:behaviorCard.topAnchor],
+        [div.leadingAnchor constraintEqualToAnchor:behaviorCard.leadingAnchor],
+        [div.trailingAnchor constraintEqualToAnchor:behaviorCard.trailingAnchor],
         [div.heightAnchor constraintEqualToConstant:1],
         // Tab bar: 20pt from left, 44pt tall, below divider
         [tabBar.topAnchor constraintEqualToAnchor:div.bottomAnchor],
-        [tabBar.leadingAnchor constraintEqualToAnchor:behaviorZone.leadingAnchor constant:20],
+        [tabBar.leadingAnchor constraintEqualToAnchor:behaviorCard.leadingAnchor constant:20],
         [tabBar.widthAnchor constraintEqualToConstant:tabX],
         [tabBar.heightAnchor constraintEqualToConstant:44],
         // Behavior status: right side of tab bar row
@@ -552,13 +582,13 @@ static NSArray<NSString *> *kDatasets;
         [bStatus.widthAnchor constraintEqualToConstant:110],
         // Serial port: trailing edge
         [portLbl.centerYAnchor constraintEqualToAnchor:tabBar.centerYAnchor],
-        [portLbl.trailingAnchor constraintEqualToAnchor:behaviorZone.trailingAnchor constant:-16],
+        [portLbl.trailingAnchor constraintEqualToAnchor:behaviorCard.trailingAnchor constant:-16],
         [portLbl.widthAnchor constraintEqualToConstant:220],
         // Scroll view: fills everything below tab bar
-        [scroll.topAnchor constraintEqualToAnchor:tabBar.bottomAnchor],
-        [scroll.leadingAnchor constraintEqualToAnchor:behaviorZone.leadingAnchor],
-        [scroll.trailingAnchor constraintEqualToAnchor:behaviorZone.trailingAnchor],
-        [scroll.bottomAnchor constraintEqualToAnchor:behaviorZone.bottomAnchor],
+        [scroll.topAnchor constraintEqualToAnchor:tabBar.bottomAnchor constant:4],
+        [scroll.leadingAnchor constraintEqualToAnchor:behaviorCard.leadingAnchor],
+        [scroll.trailingAnchor constraintEqualToAnchor:behaviorCard.trailingAnchor],
+        [scroll.bottomAnchor constraintEqualToAnchor:behaviorCard.bottomAnchor],
     ]];
 
     // Load behaviors once layout is settled
@@ -675,35 +705,39 @@ static NSArray<NSString *> *kDatasets;
             self.statusDetailLabel.stringValue = self.robotIsAwake
                 ? @"Reachy is awake and ready."
                 : @"Connected — press Wake Up to start.";
-            self.statusDetailLabel.textColor = pRGBA(202,211,223,0.60);
+            self.statusDetailLabel.textColor = pRGBA(202,211,223,0.55);
             if (prev != CPStateRunning && !self.robotIsAwake) [self loadRobotSVG:@"sleeping"];
             break;
         case CPStateStarting:
-            [self.stateBadge setTitle:@"Connecting…" fill:pRGB(245,158,11) text:[NSColor whiteColor]];
+            [self.stateBadge setTitle:@"● Connecting"
+                                 fill:pRGBA(255,255,255,0.08) text:pRGBA(202,211,223,0.78)];
             [self.stateBadge invalidateIntrinsicContentSize];
             self.statusDetailLabel.stringValue = @"Establishing connection to robot…";
-            self.statusDetailLabel.textColor = pRGBA(202,211,223,0.60);
+            self.statusDetailLabel.textColor = pRGBA(202,211,223,0.55);
             if (prev != CPStateStarting) [self loadRobotSVG:@"sleeping"];
             break;
         case CPStateStopping:
-            [self.stateBadge setTitle:@"Stopping…" fill:pRGB(245,158,11) text:[NSColor whiteColor]];
+            [self.stateBadge setTitle:@"● Sleeping"
+                                 fill:pRGBA(255,255,255,0.08) text:pRGBA(202,211,223,0.78)];
             [self.stateBadge invalidateIntrinsicContentSize];
             self.statusDetailLabel.stringValue = @"Going to sleep…";
-            self.statusDetailLabel.textColor = pRGBA(202,211,223,0.60);
+            self.statusDetailLabel.textColor = pRGBA(202,211,223,0.55);
             break;
         case CPStateError:
-            [self.stateBadge setTitle:@"Error" fill:pRGB(200,40,40) text:[NSColor whiteColor]];
+            [self.stateBadge setTitle:@"● Error"
+                                 fill:pRGBA(255,120,120,0.16) text:pRGB(255,120,120)];
             [self.stateBadge invalidateIntrinsicContentSize];
             self.statusDetailLabel.stringValue = err.length ? err : @"Connection failed.";
             self.statusDetailLabel.textColor = pRGBA(255,100,100,0.90);
             if (prev != CPStateError) { self.robotIsAwake = NO; [self loadRobotSVG:@"ko"]; }
             break;
         default:
-            [self.stateBadge setTitle:@"Disconnected" fill:pRGBA(60,65,78,1) text:pRGBA(255,255,255,0.50)];
+            [self.stateBadge setTitle:@"● Disconnected"
+                                 fill:pRGBA(255,120,120,0.12) text:pRGBA(255,120,120,0.90)];
             [self.stateBadge invalidateIntrinsicContentSize];
             self.statusDetailLabel.stringValue = (s == CPStateUnknown)
                 ? @"Waiting for daemon…" : @"Not connected.";
-            self.statusDetailLabel.textColor = pRGBA(202,211,223,0.60);
+            self.statusDetailLabel.textColor = pRGBA(202,211,223,0.55);
             if (prev != s) { self.robotIsAwake = NO; [self loadRobotSVG:@"sleeping"]; }
             break;
     }
@@ -759,7 +793,8 @@ static NSArray<NSString *> *kDatasets;
                                             body:nil completion:^(id j, NSError *e) {
             // state will update via poll
         }];
-        [self.stateBadge setTitle:@"Connecting…" fill:pRGB(245,158,11) text:[NSColor whiteColor]];
+        [self.stateBadge setTitle:@"● Connecting"
+                             fill:pRGBA(255,255,255,0.08) text:pRGBA(202,211,223,0.78)];
         [self.stateBadge invalidateIntrinsicContentSize];
         self.statusDetailLabel.stringValue = @"Establishing connection to robot…";
     }
