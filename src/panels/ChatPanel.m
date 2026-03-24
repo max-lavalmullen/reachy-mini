@@ -122,9 +122,11 @@ static void liveSpeakingCB(int speaking) {
 // ── Build UI (Auto Layout) ────────────────────────────────────────────────────
 
 - (void)buildUI {
+#define cpRGB(r,g,b)   [NSColor colorWithRed:(r)/255.0 green:(g)/255.0 blue:(b)/255.0 alpha:1.0]
+#define cpRGBA(r,g,b,a) [NSColor colorWithRed:(r)/255.0 green:(g)/255.0 blue:(b)/255.0 alpha:(a)]
     NSView *v = self.view;
     v.wantsLayer = YES;
-    v.layer.backgroundColor = [NSColor colorWithWhite:0.06 alpha:1].CGColor;
+    v.layer.backgroundColor = cpRGB(5,10,18).CGColor;
 
     // Bot picker — 5 segments
     self.botPicker = [NSSegmentedControl
@@ -136,42 +138,47 @@ static void liveSpeakingCB(int speaking) {
     // TTS (classic mode)
     self.ttsCheck = [NSButton checkboxWithTitle:@"Speak replies" target:nil action:nil];
     self.ttsCheck.state = NSControlStateValueOn;
-    self.ttsCheck.contentTintColor = [NSColor colorWithRed:0.35 green:0.8 blue:0.95 alpha:1];
+    self.ttsCheck.contentTintColor = cpRGB(61,222,153);
 
     // Auto-approve (classic mode)
     self.yoloCheck = [NSButton checkboxWithTitle:@"Auto-approve" target:nil action:nil];
     self.yoloCheck.state = NSControlStateValueOn;
-    self.yoloCheck.contentTintColor = [NSColor colorWithRed:0.48 green:0.88 blue:0.63 alpha:1];
+    self.yoloCheck.contentTintColor = cpRGB(61,222,153);
 
     // Status
     self.statusLabel = [NSTextField labelWithString:@""];
-    self.statusLabel.textColor = [NSColor colorWithWhite:0.72 alpha:1];
+    self.statusLabel.textColor = cpRGBA(202,211,223,0.55);
     self.statusLabel.font = [NSFont monospacedSystemFontOfSize:11 weight:NSFontWeightRegular];
 
     // Chat scroll view
     self.chatStack  = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 820, 40)];
     self.chatStack.wantsLayer = YES;
-    self.chatStack.layer.backgroundColor = [NSColor colorWithWhite:0.09 alpha:1].CGColor;
+    self.chatStack.layer.backgroundColor = cpRGB(14,25,42).CGColor;
     self.chatScroll = [[NSScrollView alloc] init];
     self.chatScroll.hasVerticalScroller = YES;
     self.chatScroll.borderType = NSNoBorder;
     self.chatScroll.backgroundColor = [NSColor clearColor];
     self.chatScroll.documentView = self.chatStack;
     self.chatScroll.wantsLayer = YES;
-    self.chatScroll.layer.cornerRadius = 18;
+    self.chatScroll.layer.cornerRadius = 14;
     self.chatScroll.layer.borderWidth = 1;
-    self.chatScroll.layer.borderColor = [NSColor colorWithWhite:0.18 alpha:1].CGColor;
-    self.chatScroll.layer.backgroundColor = [NSColor colorWithWhite:0.09 alpha:1].CGColor;
+    self.chatScroll.layer.borderColor = cpRGBA(255,255,255,0.08).CGColor;
+    self.chatScroll.layer.backgroundColor = cpRGB(14,25,42).CGColor;
     self.stackH = 8;
 
     // Live transcript label
     self.transcriptLabel = [NSTextField labelWithString:@""];
-    self.transcriptLabel.textColor = [NSColor colorWithRed:0.4 green:0.8 blue:1.0 alpha:1];
+    self.transcriptLabel.textColor = cpRGB(61,222,153);
     self.transcriptLabel.font = [NSFont monospacedSystemFontOfSize:11 weight:NSFontWeightRegular];
 
     // Clear button
     self.clearBtn = [NSButton buttonWithTitle:@"Reset" target:self action:@selector(clearChat:)];
     self.clearBtn.bezelStyle = NSBezelStyleRounded;
+    self.clearBtn.wantsLayer = YES;
+    self.clearBtn.layer.cornerRadius = 8;
+    self.clearBtn.layer.backgroundColor = cpRGBA(255,255,255,0.05).CGColor;
+    self.clearBtn.layer.borderWidth = 1;
+    self.clearBtn.layer.borderColor = cpRGBA(255,255,255,0.12).CGColor;
 
     // ── Classic mode controls ──────────────────────────────────────────────────
     self.talkBtn = [NSButton buttonWithTitle:@"🎙  Push to Talk"
@@ -182,32 +189,33 @@ static void liveSpeakingCB(int speaking) {
     self.talkBtn.enabled = NO;
     self.talkBtn.wantsLayer = YES;
     self.talkBtn.layer.cornerRadius = 10;
-    self.talkBtn.layer.backgroundColor = [NSColor colorWithWhite:0.14 alpha:1].CGColor;
+    self.talkBtn.layer.backgroundColor = cpRGB(14,25,42).CGColor;
     self.talkBtn.layer.borderWidth = 1;
-    self.talkBtn.layer.borderColor = [NSColor colorWithWhite:0.22 alpha:1].CGColor;
+    self.talkBtn.layer.borderColor = cpRGBA(255,255,255,0.12).CGColor;
 
     self.textInput = [[NSTextField alloc] init];
-    self.textInput.placeholderString = @"Ask Reachy or dictate into the active model…";
-    self.textInput.font = [NSFont monospacedSystemFontOfSize:13 weight:NSFontWeightRegular];
+    self.textInput.placeholderString = @"Ask Reachy or type a message…";
+    self.textInput.font = [NSFont systemFontOfSize:13];
     self.textInput.target = self;
     self.textInput.action = @selector(sendText:);
     self.textInput.bezeled = NO;
     self.textInput.drawsBackground = YES;
-    self.textInput.backgroundColor = [NSColor colorWithWhite:0.1 alpha:1];
+    self.textInput.backgroundColor = cpRGB(14,25,42);
     self.textInput.textColor = [NSColor colorWithWhite:0.94 alpha:1];
     self.textInput.focusRingType = NSFocusRingTypeNone;
     self.textInput.wantsLayer = YES;
     self.textInput.layer.cornerRadius = 10;
     self.textInput.layer.borderWidth = 1;
-    self.textInput.layer.borderColor = [NSColor colorWithWhite:0.18 alpha:1].CGColor;
+    self.textInput.layer.borderColor = cpRGBA(255,255,255,0.12).CGColor;
 
     self.sendBtn = [NSButton buttonWithTitle:@"Send" target:self action:@selector(sendText:)];
     self.sendBtn.bezelStyle = NSBezelStyleRounded;
+    self.sendBtn.contentTintColor = cpRGB(61,222,153);
     self.sendBtn.wantsLayer = YES;
     self.sendBtn.layer.cornerRadius = 10;
-    self.sendBtn.layer.backgroundColor = [NSColor colorWithRed:0.18 green:0.48 blue:0.85 alpha:0.3].CGColor;
+    self.sendBtn.layer.backgroundColor = cpRGBA(61,222,153,0.15).CGColor;
     self.sendBtn.layer.borderWidth = 1;
-    self.sendBtn.layer.borderColor = [NSColor colorWithRed:0.3 green:0.68 blue:0.95 alpha:0.8].CGColor;
+    self.sendBtn.layer.borderColor = cpRGBA(61,222,153,0.55).CGColor;
 
     // ── Live mode controls ─────────────────────────────────────────────────────
     self.liveStartBtn = [NSButton buttonWithTitle:@"▶  Start Live Session"
@@ -215,12 +223,13 @@ static void liveSpeakingCB(int speaking) {
                                            action:@selector(toggleLiveSession:)];
     self.liveStartBtn.bezelStyle = NSBezelStyleRounded;
     self.liveStartBtn.font = [NSFont boldSystemFontOfSize:14];
+    self.liveStartBtn.contentTintColor = cpRGB(61,222,153);
     self.liveStartBtn.hidden = YES;
     self.liveStartBtn.wantsLayer = YES;
     self.liveStartBtn.layer.cornerRadius = 12;
-    self.liveStartBtn.layer.backgroundColor = [NSColor colorWithRed:0.12 green:0.38 blue:0.24 alpha:0.4].CGColor;
+    self.liveStartBtn.layer.backgroundColor = cpRGBA(61,222,153,0.12).CGColor;
     self.liveStartBtn.layer.borderWidth = 1;
-    self.liveStartBtn.layer.borderColor = [NSColor colorWithRed:0.3 green:0.8 blue:0.48 alpha:0.85].CGColor;
+    self.liveStartBtn.layer.borderColor = cpRGBA(61,222,153,0.55).CGColor;
 
     // Add all subviews
     for (NSView *sub in @[self.botPicker, self.ttsCheck, self.yoloCheck,
@@ -579,7 +588,7 @@ static void liveSpeakingCB(int speaking) {
     self.liveActive = NO;
     self.liveStartBtn.title = @"▶  Start Live Session";
     self.liveStartBtn.layer.backgroundColor =
-        [NSColor colorWithRed:0.12 green:0.38 blue:0.24 alpha:0.4].CGColor;
+        [NSColor colorWithRed:61/255.0 green:222/255.0 blue:153/255.0 alpha:0.12].CGColor;
     [self updateIdleStatus];
     [self setSpeaking:NO];
 }
@@ -678,11 +687,11 @@ static void liveSpeakingCB(int speaking) {
     bubble.layer.cornerRadius = 16;
     bubble.layer.borderWidth = 1;
     bubble.layer.backgroundColor = isUser
-        ? [[NSColor colorWithRed:0.18 green:0.46 blue:0.84 alpha:1] CGColor]
-        : [[NSColor colorWithWhite:0.16 alpha:1] CGColor];
+        ? [[NSColor colorWithRed:30/255.0 green:64/255.0 blue:130/255.0 alpha:1] CGColor]
+        : [[NSColor colorWithRed:14/255.0 green:25/255.0 blue:42/255.0 alpha:1] CGColor];
     bubble.layer.borderColor = isUser
-        ? [[NSColor colorWithRed:0.36 green:0.7 blue:1 alpha:0.85] CGColor]
-        : [[NSColor colorWithWhite:0.24 alpha:1] CGColor];
+        ? [[NSColor colorWithRed:80/255.0 green:140/255.0 blue:240/255.0 alpha:0.6] CGColor]
+        : [[NSColor colorWithWhite:1.0 alpha:0.08] CGColor];
     lbl.frame = NSMakeRect(12, (bh - fit.height) / 2, fit.width, fit.height);
     [bubble addSubview:lbl];
 
@@ -719,8 +728,8 @@ static void liveSpeakingCB(int speaking) {
     bubble.wantsLayer = YES;
     bubble.layer.cornerRadius = 16;
     bubble.layer.borderWidth = 1;
-    bubble.layer.backgroundColor = [[NSColor colorWithWhite:0.16 alpha:1] CGColor];
-    bubble.layer.borderColor = [[NSColor colorWithWhite:0.24 alpha:1] CGColor];
+    bubble.layer.backgroundColor = [[NSColor colorWithRed:14/255.0 green:25/255.0 blue:42/255.0 alpha:1] CGColor];
+    bubble.layer.borderColor = [[NSColor colorWithWhite:1.0 alpha:0.08] CGColor];
     lbl.frame = NSMakeRect(12, (bh - fit.height) / 2, fit.width, fit.height);
     [bubble addSubview:lbl];
 
