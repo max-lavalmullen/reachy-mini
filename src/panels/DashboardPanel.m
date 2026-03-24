@@ -11,6 +11,7 @@ static NSColor *DashboardHostColor(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
 @property (nonatomic, strong) WKWebView *webView;
 @property (nonatomic, strong) NSView *overlayView;
 @property (nonatomic, strong) NSView *overlayCard;
+@property (nonatomic, strong) NSTextField *eyebrowLabel;
 @property (nonatomic, strong) NSTextField *titleLabel;
 @property (nonatomic, strong) NSTextField *detailLabel;
 @property (nonatomic, strong) NSProgressIndicator *spinner;
@@ -44,6 +45,9 @@ static NSColor *DashboardHostColor(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
     self.webView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
     self.webView.navigationDelegate = self;
     self.webView.hidden = YES;
+    if (@available(macOS 12.0, *)) {
+        self.webView.underPageBackgroundColor = DashboardHostColor(5, 10, 18, 1);
+    }
     [self.view addSubview:self.webView];
 
     self.overlayView = [[NSView alloc] initWithFrame:self.view.bounds];
@@ -52,37 +56,47 @@ static NSColor *DashboardHostColor(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
     self.overlayView.layer.backgroundColor = DashboardHostColor(5, 10, 18, 0.94).CGColor;
     [self.view addSubview:self.overlayView];
 
-    self.overlayCard = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 520, 220)];
+    self.overlayCard = [[NSView alloc] init];
+    self.overlayCard.translatesAutoresizingMaskIntoConstraints = NO;
     self.overlayCard.wantsLayer = YES;
-    self.overlayCard.layer.cornerRadius = 24.0;
+    self.overlayCard.layer.cornerRadius = 20.0;
     self.overlayCard.layer.borderWidth = 1.0;
     self.overlayCard.layer.borderColor = DashboardHostColor(255, 255, 255, 0.08).CGColor;
-    self.overlayCard.layer.backgroundColor = DashboardHostColor(15, 20, 32, 0.94).CGColor;
-    self.overlayCard.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin | NSViewMinYMargin | NSViewMaxYMargin;
+    self.overlayCard.layer.backgroundColor = DashboardHostColor(14, 25, 42, 0.98).CGColor;
     [self.overlayView addSubview:self.overlayCard];
 
-    self.spinner = [[NSProgressIndicator alloc] initWithFrame:NSMakeRect(44, 44, 32, 32)];
+    NSView *spinnerRing = [[NSView alloc] init];
+    spinnerRing.translatesAutoresizingMaskIntoConstraints = NO;
+    spinnerRing.wantsLayer = YES;
+    spinnerRing.layer.cornerRadius = 22.0;
+    spinnerRing.layer.borderWidth = 1.0;
+    spinnerRing.layer.borderColor = DashboardHostColor(61, 222, 153, 0.28).CGColor;
+    spinnerRing.layer.backgroundColor = DashboardHostColor(61, 222, 153, 0.10).CGColor;
+    [self.overlayCard addSubview:spinnerRing];
+
+    self.spinner = [[NSProgressIndicator alloc] init];
+    self.spinner.translatesAutoresizingMaskIntoConstraints = NO;
     self.spinner.style = NSProgressIndicatorSpinningStyle;
     self.spinner.displayedWhenStopped = NO;
     [self.spinner startAnimation:nil];
-    [self.overlayCard addSubview:self.spinner];
+    [spinnerRing addSubview:self.spinner];
 
-    NSTextField *eyebrow = [NSTextField labelWithString:@"ACTIVE ROBOT"];
-    eyebrow.frame = NSMakeRect(44, 36, 160, 18);
-    eyebrow.font = [NSFont monospacedSystemFontOfSize:11 weight:NSFontWeightSemibold];
-    eyebrow.textColor = DashboardHostColor(255, 162, 53, 0.96);
-    [self.overlayCard addSubview:eyebrow];
+    self.eyebrowLabel = [NSTextField labelWithString:@"LOCAL DASHBOARD"];
+    self.eyebrowLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    self.eyebrowLabel.font = [NSFont monospacedSystemFontOfSize:11 weight:NSFontWeightSemibold];
+    self.eyebrowLabel.textColor = DashboardHostColor(61, 222, 153, 0.96);
+    [self.overlayCard addSubview:self.eyebrowLabel];
 
     self.titleLabel = [NSTextField labelWithString:@"Starting Reachy dashboard"];
-    self.titleLabel.frame = NSMakeRect(44, 70, 420, 32);
+    self.titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
     self.titleLabel.font = [NSFont systemFontOfSize:24 weight:NSFontWeightSemibold];
     self.titleLabel.textColor = [NSColor whiteColor];
     [self.overlayCard addSubview:self.titleLabel];
 
     self.detailLabel = [NSTextField labelWithString:@"Launching the local daemon and loading the official Pollen interface."];
-    self.detailLabel.frame = NSMakeRect(44, 108, 430, 44);
+    self.detailLabel.translatesAutoresizingMaskIntoConstraints = NO;
     self.detailLabel.font = [NSFont systemFontOfSize:14 weight:NSFontWeightRegular];
-    self.detailLabel.textColor = DashboardHostColor(202, 211, 223, 0.82);
+    self.detailLabel.textColor = DashboardHostColor(202, 211, 223, 0.55);
     self.detailLabel.lineBreakMode = NSLineBreakByWordWrapping;
     self.detailLabel.maximumNumberOfLines = 3;
     [self.overlayCard addSubview:self.detailLabel];
@@ -90,22 +104,55 @@ static NSColor *DashboardHostColor(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
     self.retryButton = [NSButton buttonWithTitle:@"Retry"
                                           target:self
                                           action:@selector(retryClicked:)];
-    self.retryButton.frame = NSMakeRect(44, 168, 110, 32);
+    self.retryButton.translatesAutoresizingMaskIntoConstraints = NO;
     self.retryButton.bezelStyle = NSBezelStyleRounded;
+    self.retryButton.font = [NSFont systemFontOfSize:13 weight:NSFontWeightSemibold];
+    self.retryButton.contentTintColor = DashboardHostColor(61, 222, 153, 1.0);
+    self.retryButton.wantsLayer = YES;
+    self.retryButton.layer.cornerRadius = 10.0;
+    self.retryButton.layer.borderWidth = 1.0;
+    self.retryButton.layer.borderColor = DashboardHostColor(61, 222, 153, 0.55).CGColor;
+    self.retryButton.layer.backgroundColor = DashboardHostColor(61, 222, 153, 0.14).CGColor;
     self.retryButton.hidden = YES;
     [self.overlayCard addSubview:self.retryButton];
-}
 
-- (void)viewDidLayout {
-    [super viewDidLayout];
+    NSLayoutConstraint *preferredCardWidth = [self.overlayCard.widthAnchor constraintEqualToConstant:560.0];
+    preferredCardWidth.priority = NSLayoutPriorityDefaultHigh;
 
-    CGFloat cardWidth = 520.0;
-    CGFloat cardHeight = 220.0;
-    NSRect bounds = self.overlayView.bounds;
-    self.overlayCard.frame = NSMakeRect((NSWidth(bounds) - cardWidth) / 2.0,
-                                        (NSHeight(bounds) - cardHeight) / 2.0,
-                                        cardWidth,
-                                        cardHeight);
+    [NSLayoutConstraint activateConstraints:@[
+        [self.overlayCard.centerXAnchor constraintEqualToAnchor:self.overlayView.centerXAnchor],
+        [self.overlayCard.centerYAnchor constraintEqualToAnchor:self.overlayView.centerYAnchor],
+        preferredCardWidth,
+        [self.overlayCard.widthAnchor constraintLessThanOrEqualToAnchor:self.overlayView.widthAnchor constant:-40.0],
+        [self.overlayCard.heightAnchor constraintEqualToConstant:232.0],
+        [self.overlayCard.leadingAnchor constraintGreaterThanOrEqualToAnchor:self.overlayView.leadingAnchor constant:20.0],
+        [self.overlayCard.trailingAnchor constraintLessThanOrEqualToAnchor:self.overlayView.trailingAnchor constant:-20.0],
+
+        [spinnerRing.leadingAnchor constraintEqualToAnchor:self.overlayCard.leadingAnchor constant:28.0],
+        [spinnerRing.topAnchor constraintEqualToAnchor:self.overlayCard.topAnchor constant:28.0],
+        [spinnerRing.widthAnchor constraintEqualToConstant:44.0],
+        [spinnerRing.heightAnchor constraintEqualToConstant:44.0],
+
+        [self.spinner.centerXAnchor constraintEqualToAnchor:spinnerRing.centerXAnchor],
+        [self.spinner.centerYAnchor constraintEqualToAnchor:spinnerRing.centerYAnchor],
+
+        [self.eyebrowLabel.leadingAnchor constraintEqualToAnchor:spinnerRing.trailingAnchor constant:16.0],
+        [self.eyebrowLabel.topAnchor constraintEqualToAnchor:self.overlayCard.topAnchor constant:30.0],
+        [self.eyebrowLabel.trailingAnchor constraintLessThanOrEqualToAnchor:self.overlayCard.trailingAnchor constant:-28.0],
+
+        [self.titleLabel.leadingAnchor constraintEqualToAnchor:self.eyebrowLabel.leadingAnchor],
+        [self.titleLabel.topAnchor constraintEqualToAnchor:self.eyebrowLabel.bottomAnchor constant:8.0],
+        [self.titleLabel.trailingAnchor constraintEqualToAnchor:self.overlayCard.trailingAnchor constant:-28.0],
+
+        [self.detailLabel.leadingAnchor constraintEqualToAnchor:self.titleLabel.leadingAnchor],
+        [self.detailLabel.topAnchor constraintEqualToAnchor:self.titleLabel.bottomAnchor constant:10.0],
+        [self.detailLabel.trailingAnchor constraintEqualToAnchor:self.titleLabel.trailingAnchor],
+
+        [self.retryButton.leadingAnchor constraintEqualToAnchor:self.titleLabel.leadingAnchor],
+        [self.retryButton.topAnchor constraintEqualToAnchor:self.detailLabel.bottomAnchor constant:18.0],
+        [self.retryButton.widthAnchor constraintEqualToConstant:112.0],
+        [self.retryButton.heightAnchor constraintEqualToConstant:36.0],
+    ]];
 }
 
 - (NSString *)dashboardURLString {
@@ -135,6 +182,8 @@ static NSColor *DashboardHostColor(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
     self.hasIssuedLoadRequest = NO;
     self.retryButton.hidden = YES;
     self.webView.hidden = YES;
+    self.eyebrowLabel.stringValue = @"LOCAL DASHBOARD";
+    self.eyebrowLabel.textColor = DashboardHostColor(61, 222, 153, 0.96);
     [self.spinner startAnimation:nil];
     [self setOverlayTitle:@"Starting Reachy dashboard"
                    detail:@"Launching the local daemon and loading the official Pollen interface."];
@@ -189,6 +238,7 @@ static NSColor *DashboardHostColor(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
                 self.hasIssuedLoadRequest = YES;
                 [self.pollTimer invalidate];
                 self.pollTimer = nil;
+                self.eyebrowLabel.stringValue = @"DAEMON READY";
                 [self setOverlayTitle:@"Loading interface"
                                detail:@"The daemon is up. Rendering the official Reachy dashboard now."];
                 NSURL *dashURL = [NSURL URLWithString:[self dashboardURLString]];
@@ -206,6 +256,7 @@ static NSColor *DashboardHostColor(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
             }
 
             if (self.pollAttemptCount == 6) {
+                self.eyebrowLabel.stringValue = @"STARTING DAEMON";
                 [self setOverlayTitle:@"Starting daemon"
                                detail:@"The local server is initializing on 127.0.0.1:8000. This takes a few seconds on first launch."];
             }
@@ -222,6 +273,8 @@ static NSColor *DashboardHostColor(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
     [self.pollTimer invalidate];
     self.pollTimer = nil;
     self.hasIssuedLoadRequest = NO;
+    self.eyebrowLabel.stringValue = @"LOAD FAILED";
+    self.eyebrowLabel.textColor = DashboardHostColor(255, 120, 120, 0.96);
     [self.spinner stopAnimation:nil];
     self.retryButton.hidden = NO;
     [self setOverlayTitle:title detail:detail];
