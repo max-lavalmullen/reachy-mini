@@ -1,0 +1,84 @@
+{
+  "apps": [
+    {
+      "id": "reachy_mini_radio",
+      "title": "Reachy Mini Radio",
+      "source_space": "https://huggingface.co/spaces/pollen-robotics/reachy_mini_radio",
+      "local_clone": "/Users/maxl/Desktop/reachy-mini/apps/community_sources/reachy_mini_radio",
+      "status": "cloned",
+      "desktop_port_note": "Rebuild as a native radio tuner where head tilt maps directly to station frequency."
+    },
+    {
+      "id": "Theremini",
+      "title": "Theremini",
+      "source_space": "https://huggingface.co/spaces/RemiFabre/Theremini",
+      "local_clone": "/Users/maxl/Desktop/reachy-mini/apps/community_sources/Theremini",
+      "status": "cloned",
+      "desktop_port_note": "Keep the theremin idea, but retune controls so head movement and antennas feel immediate and stable on desktop."
+    },
+    {
+      "id": "reachy_mini_clock",
+      "title": "Reachy Mini Clock",
+      "source_space": "https://huggingface.co/spaces/pollen-robotics/reachy_mini_clock",
+      "local_clone": "/Users/maxl/Desktop/reachy-mini/apps/community_sources/reachy_mini_clock",
+      "status": "cloned",
+      "desktop_port_note": "Use antenna positions and a cleaner always-on native clock card."
+    },
+    {
+      "id": "reachy_mini_metronome",
+      "title": "Reachy Mini Metronome",
+      "source_space": "https://huggingface.co/spaces/Boopster/reachy_mini_metronome",
+      "local_clone": "/Users/maxl/Desktop/reachy-mini/apps/community_sources/reachy_mini_metronome",
+      "status": "cloned",
+      "desktop_port_note": "Use mirrored antenna swing, BPM controls, and dependable local audio output."
+    },
+    {
+      "id": "hand_tracker_v2",
+      "title": "Hand Tracker V2",
+      "source_space": "https://huggingface.co/spaces/pollen-robotics/hand_tracker_v2",
+      "local_clone": "/Users/maxl/Desktop/reachy-mini/apps/community_sources/hand_tracker_v2",
+      "status": "cloned",
+      "desktop_port_note": "Rehost the hand-following logic with your direct camera path instead of the broken app wrapper."
+    },
+    {
+      "id": "emotions",
+      "title": "Emotions",
+      "source_space": "https://huggingface.co/spaces/RemiFabre/emotions",
+      "local_clone": "/Users/maxl/Desktop/reachy-mini/apps/community_sources/emotions",
+      "status": "cloned",
+      "desktop_port_note": "Expose the emotion wheel and review flow as a native emotion browser."
+    },
+    {
+      "id": "chess_emotions_app",
+      "title": "Chess Emotions App",
+      "source_space": "https://huggingface.co/spaces/RemiFabre/chess_emotions_app",
+      "local_clone": "/Users/maxl/Desktop/reachy-mini/apps/community_sources/chess_emotions_app",
+      "status": "cloned",
+      "desktop_port_note": "Pair chess-state input with emotion reactions and a cleaner move/reaction timeline."
+    },
+    {
+      "id": "reachy_mini_astronomer",
+      "title": "Reachy Mini Astronomer",
+      "source_space": "https://huggingface.co/spaces/dlouapre/reachy_mini_astronomer",
+      "local_clone": "/Users/maxl/Desktop/reachy-mini/apps/community_sources/reachy_mini_astronomer",
+      "status": "cloned",
+      "desktop_port_note": "Port the astronomy conversation/profile flow into the same embedded conversation host used by Rubik Coach."
+    },
+    {
+      "id": "dj_reactor",
+      "title": "DJ Reactor",
+      "source_space": "https://huggingface.co/spaces/RyeCatcher/dj_reactor",
+      "local_clone": "/Users/maxl/Desktop/reachy-mini/apps/community_sources/dj_reactor",
+      "status": "cloned",
+      "desktop_port_note": "Use local BPM/energy analysis and drive dance moves from the audio stream."
+    },
+    {
+      "id": "dj-reachy",
+      "title": "DJ Reachy",
+      "source_space": "https://huggingface.co/spaces/mzurki/dj-reachy",
+      "local_clone": "/Users/maxl/Desktop/reachy-mini/apps/community_sources/dj-reachy",
+      "status": "cloned",
+      "desktop_port_note": "Treat this as the generative music variant, separate from DJ Reactor's reactive beat mode."
+    }
+  ]
+}

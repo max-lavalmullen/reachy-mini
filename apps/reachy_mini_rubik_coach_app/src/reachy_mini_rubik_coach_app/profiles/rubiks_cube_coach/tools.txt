@@ -1,0 +1,7 @@
+focus_on_cube
+cube_status
+cube_guidance
+camera
+move_head
+do_nothing
+play_emotion

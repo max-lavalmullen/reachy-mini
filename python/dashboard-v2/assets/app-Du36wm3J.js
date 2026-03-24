@@ -1,0 +1,1 @@
+import{i as n}from"./index-BsdNW8gu.js";var p;(function(i){i.Nsis="nsis",i.Msi="msi",i.Deb="deb",i.Rpm="rpm",i.AppImage="appimage",i.App="app"})(p||(p={}));async function r(){return n("plugin:app|version")}async function s(){return n("plugin:app|name")}export{p as BundleType,s as getName,r as getVersion};

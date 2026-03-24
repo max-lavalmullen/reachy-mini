@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/Users/maxl/.venv/bin/python:*)",
+      "Bash(tccutil check:*)",
+      "Bash(tail:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "WebSearch"
+    ]
+  }
+}
