@@ -4,6 +4,7 @@
 APP_NAME    = ReachyControl
 BUNDLE      = $(APP_NAME).app
 BINARY      = $(BUNDLE)/Contents/MacOS/$(APP_NAME)
+DESKTOP_APP = $(HOME)/Desktop/$(BUNDLE)
 
 # Python 3.12 (uv-managed)
 PY_PREFIX   = /Users/maxl/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none
@@ -40,7 +41,7 @@ SRCS = src/main.m \
 
 OBJS = $(SRCS:.m=.o)
 
-.PHONY: all clean install env
+.PHONY: all clean install env desktop
 
 all: env $(BUNDLE)
 
@@ -87,6 +88,11 @@ resources/ReachyControl.icns:
 install: all
 	cp -r $(BUNDLE) /Applications/$(BUNDLE)
 	@echo "Installed to /Applications/$(BUNDLE)"
+
+desktop: all
+	rm -rf "$(DESKTOP_APP)"
+	ln -s "$(abspath $(BUNDLE))" "$(DESKTOP_APP)"
+	@echo "Linked on Desktop: $(DESKTOP_APP)"
 
 clean:
 	rm -f $(OBJS)
