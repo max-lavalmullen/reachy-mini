@@ -60,7 +60,7 @@ $(BUNDLE): $(OBJS) resources/ReachyControl.icns
 	@cp resources/reachy-mini-awake.svg $(BUNDLE)/Contents/Resources/reachy-mini-awake.svg
 	@cp resources/reachy-mini-ko.svg $(BUNDLE)/Contents/Resources/reachy-mini-ko.svg
 	@cp resources/ReachyControl.icns $(BUNDLE)/Contents/Resources/ReachyControl.icns
-	@if [ -f .env ]; then cp .env $(BUNDLE)/Contents/Resources/.env; fi
+	@if [ -f .env ]; then awk '!/^[[:space:]]*#/ && !/^[[:space:]]*$$/' .env > $(BUNDLE)/Contents/Resources/.env; fi
 	@if [ -d python/dashboard-v2 ]; then rm -rf $(BUNDLE)/Contents/Resources/dashboard-v2; cp -R python/dashboard-v2 $(BUNDLE)/Contents/Resources/dashboard-v2; fi
 	@if [ -d apps/reachy_mini_rubik_coach_app ]; then mkdir -p $(BUNDLE)/Contents/Resources/apps; rm -rf $(BUNDLE)/Contents/Resources/apps/reachy_mini_rubik_coach_app; cp -R apps/reachy_mini_rubik_coach_app $(BUNDLE)/Contents/Resources/apps/; fi
 	@cp -r $(VENV_DIR) $(BUNDLE)/Contents/Resources/venv

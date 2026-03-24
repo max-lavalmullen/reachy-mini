@@ -21,6 +21,13 @@ from types import SimpleNamespace
 logging.basicConfig(level=logging.INFO, format="[bridge] %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
+# The native host already loads .env into the process before Python starts.
+# Skip secondary dotenv parsing inside packaged app modules and keep subprocesses UTF-8.
+os.environ.setdefault("REACHY_MINI_SKIP_DOTENV", "1")
+os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+os.environ.setdefault("LANG", "en_US.UTF-8")
+os.environ.setdefault("LC_CTYPE", "en_US.UTF-8")
+
 # ── State ─────────────────────────────────────────────────────────────────────
 _daemon_thread: threading.Thread | None = None
 _daemon_server = None

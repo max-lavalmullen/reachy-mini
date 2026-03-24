@@ -53,6 +53,13 @@ static NSString * const kPyPrefix = @"/Users/maxl/.local/share/uv/python/cpython
         programPath = [kPyPrefix stringByAppendingPathComponent:@"bin/python3.12"];
     }
 
+    // Embedded Python can inherit a non-UTF-8 locale from the app runtime.
+    // Force UTF-8 so bundled configs/assets with Unicode do not trip ASCII decoding.
+    setenv("PYTHONUTF8", "1", 1);
+    setenv("PYTHONIOENCODING", "utf-8", 1);
+    setenv("LANG", "en_US.UTF-8", 1);
+    setenv("LC_CTYPE", "en_US.UTF-8", 1);
+
     // Configure Python home so it finds stdlib
     NSString *pyHome = kPyPrefix;
     Py_SetPythonHome((wchar_t *)[self wcharFromString:pyHome]);
