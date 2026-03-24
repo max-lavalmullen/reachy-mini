@@ -20,6 +20,8 @@ static NSColor *DashboardHostColor(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
 @property (nonatomic, assign) NSInteger pollAttemptCount;
 @property (nonatomic, assign) BOOL probeInFlight;
 @property (nonatomic, assign) BOOL hasIssuedLoadRequest;
+@property (nonatomic, assign) BOOL hasRequestedBackendStart;
+@property (nonatomic, assign) BOOL backendStartRequestInFlight;
 @end
 
 @implementation DashboardPanel
@@ -169,6 +171,10 @@ static NSColor *DashboardHostColor(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
     return @"http://127.0.0.1:8000/api/daemon/status";
 }
 
+- (NSString *)daemonStartURLString {
+    return @"http://127.0.0.1:8000/api/daemon/start?wake_up=false";
+}
+
 - (void)retryClicked:(id)sender {
     [self.webView stopLoading];
     [self startDashboardBootSequence];
@@ -180,13 +186,15 @@ static NSColor *DashboardHostColor(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
     self.pollAttemptCount = 0;
     self.probeInFlight = NO;
     self.hasIssuedLoadRequest = NO;
+    self.hasRequestedBackendStart = NO;
+    self.backendStartRequestInFlight = NO;
     self.retryButton.hidden = YES;
     self.webView.hidden = YES;
     self.eyebrowLabel.stringValue = @"LOCAL DASHBOARD";
     self.eyebrowLabel.textColor = DashboardHostColor(61, 222, 153, 0.96);
     [self.spinner startAnimation:nil];
     [self setOverlayTitle:@"Starting Reachy dashboard"
-                   detail:@"Launching the local daemon and loading the official Pollen interface."];
+                   detail:@"Launching the local daemon, preparing the robot backend, and loading the official Pollen interface."];
     self.overlayView.hidden = NO;
 
     PythonBridge *bridge = [AppDelegate shared].pythonBridge;
@@ -203,6 +211,51 @@ static NSColor *DashboardHostColor(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
     }
 
     [self beginPollingDashboard];
+}
+
+- (void)requestDaemonBackendStart {
+    if (self.hasRequestedBackendStart || self.backendStartRequestInFlight || self.hasIssuedLoadRequest) return;
+
+    self.backendStartRequestInFlight = YES;
+    self.eyebrowLabel.stringValue = @"SERVER READY";
+    [self setOverlayTitle:@"Starting robot backend"
+                   detail:@"The local daemon is up. Connecting the Reachy backend without waking the robot yet."];
+
+    NSURL *startURL = [NSURL URLWithString:[self daemonStartURLString]];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:startURL
+                                                           cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
+                                                       timeoutInterval:5.0];
+    request.HTTPMethod = @"POST";
+
+    [[[NSURLSession sharedSession] dataTaskWithRequest:request
+                                     completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.backendStartRequestInFlight = NO;
+            if (self.hasIssuedLoadRequest) return;
+
+            NSHTTPURLResponse *http = (NSHTTPURLResponse *)response;
+            if (!error && (http.statusCode == 200 || http.statusCode == 409)) {
+                self.hasRequestedBackendStart = YES;
+                return;
+            }
+
+            NSString *reason = error.localizedDescription;
+            if (!reason.length && data.length > 0) {
+                NSDictionary *payload = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+                if ([payload isKindOfClass:[NSDictionary class]]) {
+                    id detail = payload[@"detail"];
+                    if ([detail isKindOfClass:[NSString class]]) {
+                        reason = detail;
+                    }
+                }
+            }
+            if (!reason.length) {
+                reason = @"The backend start request did not succeed.";
+            }
+
+            [self presentFailureWithTitle:@"Backend start failed" detail:reason];
+        });
+    }] resume];
 }
 
 - (void)beginPollingDashboard {
@@ -233,24 +286,48 @@ static NSColor *DashboardHostColor(CGFloat r, CGFloat g, CGFloat b, CGFloat a) {
             if (self.hasIssuedLoadRequest) return;
 
             NSHTTPURLResponse *http = (NSHTTPURLResponse *)response;
-            BOOL daemonReady = (!error && http.statusCode == 200 && data.length > 0);
-            if (daemonReady) {
-                self.hasIssuedLoadRequest = YES;
-                [self.pollTimer invalidate];
-                self.pollTimer = nil;
-                self.eyebrowLabel.stringValue = @"DAEMON READY";
-                [self setOverlayTitle:@"Loading interface"
-                               detail:@"The daemon is up. Rendering the official Reachy dashboard now."];
-                NSURL *dashURL = [NSURL URLWithString:[self dashboardURLString]];
-                [self.webView loadRequest:[NSURLRequest requestWithURL:dashURL
-                                                           cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
-                                                       timeoutInterval:30.0]];
-                return;
+            if (!error && http.statusCode == 200 && data.length > 0) {
+                id jsonObject = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+                NSDictionary *payload = [jsonObject isKindOfClass:[NSDictionary class]] ? jsonObject : nil;
+                NSString *daemonState = [payload[@"state"] isKindOfClass:[NSString class]] ? payload[@"state"] : nil;
+                NSString *daemonError = [payload[@"error"] isKindOfClass:[NSString class]] ? payload[@"error"] : nil;
+
+                if ([daemonState isEqualToString:@"running"]) {
+                    self.hasIssuedLoadRequest = YES;
+                    [self.pollTimer invalidate];
+                    self.pollTimer = nil;
+                    self.eyebrowLabel.stringValue = @"ROBOT READY";
+                    [self setOverlayTitle:@"Loading interface"
+                                   detail:@"The Reachy backend is running. Rendering the official dashboard now."];
+                    NSURL *dashURL = [NSURL URLWithString:[self dashboardURLString]];
+                    [self.webView loadRequest:[NSURLRequest requestWithURL:dashURL
+                                                               cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
+                                                           timeoutInterval:30.0]];
+                    return;
+                }
+
+                if ([daemonState isEqualToString:@"error"]) {
+                    [self presentFailureWithTitle:@"Backend failed to start"
+                                           detail:daemonError.length ? daemonError : @"The Reachy backend reported an error during startup."];
+                    return;
+                }
+
+                if ([daemonState isEqualToString:@"not_initialized"] || [daemonState isEqualToString:@"stopped"]) {
+                    [self requestDaemonBackendStart];
+                } else if ([daemonState isEqualToString:@"starting"]) {
+                    self.eyebrowLabel.stringValue = @"BOOTING ROBOT";
+                    [self setOverlayTitle:@"Starting robot backend"
+                                   detail:@"The daemon is connecting to Reachy Mini. This can take several seconds on first launch."];
+                } else if ([daemonState isEqualToString:@"stopping"]) {
+                    self.eyebrowLabel.stringValue = @"WAITING FOR STOP";
+                    [self setOverlayTitle:@"Finishing previous session"
+                                   detail:@"The previous backend session is stopping before the dashboard can continue."];
+                }
             }
 
             self.pollAttemptCount += 1;
             if (self.pollAttemptCount >= 60) {
-                NSString *reason = error.localizedDescription ?: @"The local daemon never came up.";
+                NSString *reason = error.localizedDescription ?: @"The local daemon never reached a running state.";
                 [self presentFailureWithTitle:@"Dashboard timed out" detail:reason];
                 return;
             }
